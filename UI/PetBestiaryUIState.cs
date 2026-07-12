@@ -131,6 +131,13 @@ public sealed class PetBestiaryUIState : UIState
         progressBar.Height.Set(10f, 0f);
         panel.Append(progressBar);
 
+        CloseIconButton closeButton = new(PetBestiaryUISystem.Close);
+        closeButton.Left.Set(PanelWidth - 64f, 0f);
+        closeButton.Top.Set(-6f, 0f);
+        closeButton.Width.Set(30f, 0f);
+        closeButton.Height.Set(30f, 0f);
+        panel.Append(closeButton);
+
         RebuildStaticRows();
     }
 
@@ -863,6 +870,51 @@ internal enum PetFilter
     Unlocked,
     Locked,
     Active
+}
+
+internal sealed class CloseIconButton : UIElement
+{
+    private readonly Action action;
+
+    public CloseIconButton(Action action)
+    {
+        this.action = action;
+        OnLeftClick += (_, _) =>
+        {
+            action();
+            SoundEngine.PlaySound(SoundID.MenuClose);
+        };
+    }
+
+    protected override void DrawSelf(SpriteBatch spriteBatch)
+    {
+        Rectangle bounds = GetDimensions().ToRectangle();
+        Color border = IsMouseHovering ? new Color(255, 226, 90) : Color.Black;
+        Color fill = IsMouseHovering ? new Color(178, 54, 54) : new Color(128, 37, 44);
+        Color inner = IsMouseHovering ? new Color(225, 92, 82) : new Color(170, 58, 61);
+
+        spriteBatch.Draw(TextureAssets.MagicPixel.Value, bounds, border);
+        spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(bounds.X + 3, bounds.Y + 3, bounds.Width - 6, bounds.Height - 6), fill);
+        spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(bounds.X + 6, bounds.Y + 6, bounds.Width - 12, bounds.Height - 12), inner);
+
+        DrawX(spriteBatch, bounds, Color.White);
+        if (IsMouseHovering)
+        {
+            Main.instance.MouseText("Close");
+        }
+    }
+
+    private static void DrawX(SpriteBatch spriteBatch, Rectangle bounds, Color color)
+    {
+        int left = bounds.X + 10;
+        int top = bounds.Y + 10;
+        int size = bounds.Width - 20;
+        for (int i = 0; i <= size; i++)
+        {
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(left + i, top + i, 2, 2), color);
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(left + size - i, top + i, 2, 2), color);
+        }
+    }
 }
 
 internal sealed class DiceButton : UIElement
